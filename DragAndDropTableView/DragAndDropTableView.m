@@ -8,38 +8,10 @@
 
 #import "DragAndDropTableView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "DragAndDropProxy.h"
 #import "UIView+Snapshot.h"
 
 const static CGFloat kAutoScrollingThreshold = 60;
-
-@interface Proxy : NSObject
-{
-    NSObject *_proxyObject;
-}
-
-@end
-
-@interface ProxyDataSource : Proxy<UITableViewDataSource>
-
-@property (nonatomic) NSObject<UITableViewDataSource> *dataSource;
-@property (nonatomic) NSIndexPath *movingIndexPath;
-
--(id)initWithDataSource:(id<UITableViewDataSource>)datasource;
-
-@end
-
-@interface ProxyDelegate : Proxy<UITableViewDelegate>
-{
-    NSObject<UITableViewDelegate> *_delegate;
-}
-
-
--(id)initWithDelegate:(id<UITableViewDelegate>)delegate;
-
-@end
-
-
-
 
 @implementation DragAndDropTableView
 
@@ -167,7 +139,7 @@ const static CGFloat kAutoScrollingThreshold = 60;
         else if(_lastIndexPathValid && !_tempNewSectionIndexPath)
         {
             // check if we are above or below the "valid" table and propose a new section if supported by the delegate
-            int maxSection = [self.dataSource numberOfSectionsInTableView:self];
+            NSInteger maxSection = [self.dataSource numberOfSectionsInTableView:self];
             NSIndexPath *proposedIndexPath = nil;
             if(_latestTouchPoint.y > [self rectForFooterInSection:maxSection-1].origin.y) //CGRectGetMaxY([self rectForFooterInSection:maxSection-1]))
             {
@@ -233,7 +205,7 @@ const static CGFloat kAutoScrollingThreshold = 60;
 
 #pragma mark Overrides
 
--(int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [_proxyDataSource tableView:tableView numberOfRowsInSection:section];
 }
@@ -245,14 +217,14 @@ const static CGFloat kAutoScrollingThreshold = 60;
 
 -(void)setDataSource:(id<UITableViewDataSource>)dataSource
 {
-    _proxyDataSource = dataSource ? [[ProxyDataSource alloc] initWithDataSource:dataSource] : nil;
+    _proxyDataSource = dataSource ? [[DragAndDropProxyDataSource alloc] initWithDataSource:dataSource] : nil;
     
     [super setDataSource:_proxyDataSource];
 }
 
 -(void)setDelegate:(id<UITableViewDelegate>)delegate
 {
-    _proxyDelegate = delegate ? [[ProxyDelegate alloc] initWithDelegate:delegate] : nil;
+    _proxyDelegate = delegate ? [[DragAndDropProxyDelegate alloc] initWithDelegate:delegate] : nil;
         
     [super setDelegate:_proxyDelegate];
 } 
@@ -331,173 +303,4 @@ const static CGFloat kAutoScrollingThreshold = 60;
 
 #pragma mark -
 
-@end
-
-@implementation ProxyDataSource
-@synthesize movingIndexPath = _movingIndexPath;
-@synthesize dataSource = _dataSource;
-
--(id)initWithDataSource:(id<UITableViewDataSource>)datasource
-{
-    if(self = [super init])
-    {
-        _dataSource = datasource;
-        _proxyObject = datasource;
-    }
-    return self;
-}
-
-#pragma mark UITableViewDataSource
-
--(int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    // if there are no cells in section we must fake one so that is will be possible to insert a row
-    int rows = [_dataSource tableView:tableView numberOfRowsInSection:section];
-    return rows == 0 ? 1 : rows;
-}
-
--(void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
-{
-    int rows = [_dataSource tableView:tableView numberOfRowsInSection:destinationIndexPath.section];
-    if(rows == 0)
-    {
-        // it's a fake cell, remove it
-        [tableView beginUpdates];
-        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:destinationIndexPath] withRowAnimation:UITableViewRowAnimationNone];
-        [tableView endUpdates];
-    }
-
-    [_dataSource tableView:tableView moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
-    
-    // if the source section is empty after the update, a fake row must be inserted
-    rows = [_dataSource tableView:tableView numberOfRowsInSection:sourceIndexPath.section];
-    if(rows == 0)
-    {
-        [tableView beginUpdates];
-        [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:sourceIndexPath] withRowAnimation:UITableViewRowAnimationNone];
-        [tableView endUpdates];
-    }
-    
-}
-
--(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    BOOL updated = NO;
-    if(UITableViewCellEditingStyleDelete == editingStyle)
-    {
-        // if there source section will be empty after the update, a fake row must be inserted
-        int rows = [_dataSource tableView:tableView numberOfRowsInSection:indexPath.section];
-        if(rows == 1)
-        {
-            [tableView beginUpdates];
-            [_dataSource tableView:tableView commitEditingStyle:editingStyle forRowAtIndexPath:indexPath];
-            [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            [tableView endUpdates];
-            updated = YES;
-        }
-    }
-    
-    if(!updated)
-        [_dataSource tableView:tableView commitEditingStyle:editingStyle forRowAtIndexPath:indexPath];
-    
-}
-
--(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    int rows = [_dataSource tableView:tableView numberOfRowsInSection:indexPath.section];
-    
-    if(![indexPath isEqual:_movingIndexPath] && rows != 0)
-    {
-        return [_dataSource performSelector:@selector(tableView:cellForRowAtIndexPath:) withObject:tableView withObject:indexPath];
-    }
-
-    static NSString *CellIdentifier = @"EmptyCell";
-    
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if(!cell)
-    {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-        cell.backgroundColor = [UIColor clearColor];
-    }
-    return cell;
-}
-
-#pragma mark -
-
-@end
-
-@implementation ProxyDelegate
-
--(id)initWithDelegate:(id<UITableViewDelegate>)delegate
-{
-    if(self = [super init])
-    {
-        _delegate = delegate;
-        _proxyObject = delegate;
-    }
-    return self;
-}
-
-#pragma mark UITableViewDelegate
-
--(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    int count = [((ProxyDataSource *)tableView.dataSource).dataSource tableView:tableView numberOfRowsInSection:indexPath.section];
-
-    CGFloat height = 0;
-    if(count > 0)
-        height = [_delegate tableView:tableView heightForRowAtIndexPath:indexPath];
-    else if([_delegate respondsToSelector:@selector(tableView:heightForEmptySection:)])
-        height = [((NSObject<DragAndDropTableViewDelegate> *)_delegate) tableView:(DragAndDropTableView *)tableView heightForEmptySection:indexPath.section];
-    else
-        height = 0;
-
-    return height;
-}
-
-- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    int rows = [((ProxyDataSource *)tableView.dataSource).dataSource tableView:tableView numberOfRowsInSection:indexPath.section];
-    
-    // you can't edit/delete the place holder cells
-    if(rows == 0)
-        return UITableViewCellEditingStyleNone;
-    else if([_delegate respondsToSelector:@selector(tableView:editingStyleForRowAtIndexPath:)])
-        return [_delegate tableView:tableView editingStyleForRowAtIndexPath:indexPath];
-    else
-    {
-        // if the cell is in editing mode it should return UITableViewCellEditingStyleDelete (according to the docs) otherwise no style
-        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-        return cell.editing ? UITableViewCellEditingStyleDelete : UITableViewCellEditingStyleNone;
-    }
-    
-}
-
-#pragma mark -
-
-@end
-
-@implementation Proxy
-
--(void)forwardInvocation:(NSInvocation *)invocation {
-	if (!_proxyObject) {
-		[self doesNotRecognizeSelector: [invocation selector]];
-	}
-	[invocation invokeWithTarget:_proxyObject];
-}
-
--(NSMethodSignature*)methodSignatureForSelector:(SEL)selector {
-	NSMethodSignature *signature = [super methodSignatureForSelector:selector];
-	if (! signature) {
-		signature = [_proxyObject methodSignatureForSelector:selector];
-	}
-	return signature;
-}
-
--(BOOL)respondsToSelector:(SEL)aSelector
-{
-    return [super respondsToSelector:aSelector] || (_proxyObject && [_proxyObject respondsToSelector:aSelector]);
-}
-
-#pragma mark -
 @end

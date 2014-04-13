@@ -9,8 +9,8 @@
 #import <UIKit/UIKit.h>
 #import </usr/include/objc/objc-class.h>
 
-@class ProxyDataSource;
-@class ProxyDelegate;
+@class DragAndDropProxyDataSource;
+@class DragAndDropProxyDelegate;
 @class DragAndDropTableView;
 
 @protocol DragAndDropTableViewDataSource <NSObject>
@@ -48,7 +48,7 @@
  @param tableView The table view requesting this information.
  @param section The location of the section
 */
--(CGFloat)tableView:(DragAndDropTableView *)tableView heightForEmptySection:(int)section;
+-(CGFloat)tableView:(DragAndDropTableView *)tableView heightForEmptySection:(NSInteger)section;
 @end
 
 @interface DragAndDropTableView : UITableView<UITableViewDataSource>
@@ -65,8 +65,8 @@
     BOOL _lastIndexPathValid;
     NSIndexPath *_tempNewSectionIndexPath;
     
-    ProxyDataSource *_proxyDataSource;
-    ProxyDelegate *_proxyDelegate;
+    DragAndDropProxyDataSource *_proxyDataSource;
+    DragAndDropProxyDelegate *_proxyDelegate;
     
     CGFloat _autoscrollDistance;
     NSTimer *_autoscrollTimer;
