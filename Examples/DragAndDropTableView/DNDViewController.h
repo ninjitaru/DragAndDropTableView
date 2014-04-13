@@ -8,10 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "DragAndDropTableView.h"
+#import "PanableDragAndDropTableView.h"
 
 @interface DNDViewController : UIViewController<UITableViewDelegate,UITableViewDataSource,DragAndDropTableViewDataSource,DragAndDropTableViewDelegate>
 {
     NSMutableArray *_datasource;
-    DragAndDropTableView *_tableView;
+    PanableDragAndDropTableView *_tableView;
 }
 @end

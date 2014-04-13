@@ -55,6 +55,7 @@
             } else {
                 if(translation.x > self.minimumPanWidthToRecognize) {
                     self.panActivatedDragging = YES;
+                    self.panGestureRecognizer.enabled = NO;
                     [self beginDraggingWithGestureRecognizer: gestureRecognizer];
                 }
             }
@@ -62,6 +63,7 @@
     } else if(UIGestureRecognizerStateEnded == gestureRecognizer.state) {
         self.giveupRecognized = NO;
         if(self.panActivatedDragging) {
+            self.panGestureRecognizer.enabled = YES;
             [self endDraggingWithGestureRecognizer: gestureRecognizer];
             self.panActivatedDragging = NO;
         }

@@ -9,6 +9,8 @@
 #import "DNDViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
+static NSString *const tableViewCellName = @"TableViewCell";
+
 @interface DNDViewController ()
 
 @end
@@ -19,17 +21,11 @@
 {
     if(self = [super init])
     {
-        _datasource = [NSMutableArray arrayWithObjects:
-                       [NSMutableArray arrayWithObjects:@"a",@"b",@"c",@"d",nil],
-                       [NSMutableArray array],
-                       [NSMutableArray arrayWithObjects:@"e",@"f",@"g",@"h", nil],
-                       [NSMutableArray arrayWithObjects:@"i",@"j",@"k",@"l", nil],
-                       nil];
-        _tableView = [[DragAndDropTableView alloc] initWithFrame:self.view.bounds];
-        [self.view addSubview:_tableView];
-        _tableView.delegate = self;
-        _tableView.dataSource = self;
-        _tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0);
+        _datasource = [NSMutableArray arrayWithObject: [NSMutableArray array]];
+        NSMutableArray *section1Data = [_datasource objectAtIndex: 0];
+        for(NSInteger i = 0; i < 100; i++) {
+            [section1Data addObject: [NSString stringWithFormat:@"Book %li",i+1]];
+        }
     }
     return self;
 }
@@ -37,39 +33,43 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
+    self.view.backgroundColor = [UIColor whiteColor];
+	_tableView = [[PanableDragAndDropTableView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:_tableView];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    [_tableView registerClass:[UITableViewCell class] forCellReuseIdentifier: tableViewCellName];
+//    if([self respondsToSelector: @selector(topLayoutGuide)]) {
+//        _tableView.contentInset = UIEdgeInsetsMake(self.topLayoutGuide.length, 0, 0, 0);
+//    }
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void) viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    if([self respondsToSelector: @selector(topLayoutGuide)]) {
+    _tableView.frame = (CGRect) {0,self.topLayoutGuide.length,CGRectGetWidth(self.view.bounds),CGRectGetHeight(self.view.bounds)-self.topLayoutGuide.length};
+    } else {
+        _tableView.frame = self.view.bounds;
+    }
 }
 
 #pragma mark -
 
 #pragma mark UITableViewDataSource
 
--(int)numberOfSectionsInTableView:(UITableView *)tableView
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return _datasource.count;
 }
 
--(int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [[_datasource objectAtIndex:section] count];
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *tableViewCellName = @"TableViewCell";
-    
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:tableViewCellName];
-    if(!cell)
-    {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableViewCellName];
-    }
-    
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:tableViewCellName forIndexPath: indexPath];
     cell.textLabel.text = [[_datasource objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     return cell;
 }
@@ -177,7 +177,7 @@
     [tableView endUpdates];
 }
 
--(CGFloat)tableView:tableView heightForEmptySection:(int)section
+-(CGFloat)tableView:tableView heightForEmptySection:(NSInteger)section
 {
     return 10;
 }
