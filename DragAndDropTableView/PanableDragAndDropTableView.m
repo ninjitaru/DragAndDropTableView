@@ -12,7 +12,6 @@
 @interface PanableDragAndDropTableView () <UIGestureRecognizerDelegate>
 @property (nonatomic,assign) BOOL panActivatedDragging;
 @property (nonatomic,assign) BOOL giveupRecognized;
-@property (nonatomic,strong) NSIndexPath *panDraggingIndexPath;
 @property (nonatomic,strong) UIPanGestureRecognizer *panRightGestureRecognizer;
 @end
 
@@ -28,6 +27,15 @@
     [self addGestureRecognizer: self.panRightGestureRecognizer];
 }
 
+- (void) setEnablePanRightToDragAndDrop:(BOOL)enablePanRightToDragAndDrop {
+    self.panRightGestureRecognizer.enabled = enablePanRightToDragAndDrop;
+    if(!self.panRightGestureRecognizer.enabled) {
+        self.panGestureRecognizer.enabled = YES;
+        self.panActivatedDragging = NO;
+        self.giveupRecognized = NO;
+    }
+}
+
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     if([gestureRecognizer isKindOfClass: [UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass: [UIPanGestureRecognizer class]]) {
         if(self.panActivatedDragging) {
@@ -41,7 +49,6 @@
 - (void) onPanGestureRecognizerPan:(UIPanGestureRecognizer *)gestureRecognizer {
     
     if(UIGestureRecognizerStateBegan ==  gestureRecognizer.state) {
-        self.panDraggingIndexPath = [self indexPathForRowAtPoint: [gestureRecognizer locationInView: self]];
     } else if(UIGestureRecognizerStateChanged == gestureRecognizer.state) {
         if(self.giveupRecognized) {
             return;
