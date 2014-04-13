@@ -7,9 +7,7 @@
 //
 
 #import "DragAndDropTableView.h"
-#import <QuartzCore/QuartzCore.h>
 #import "DragAndDropProxy.h"
-#import "UIView+Snapshot.h"
 #import "DragAndDropTableView+Private.h"
 
 @implementation DragAndDropTableView
@@ -32,14 +30,6 @@
         [self setup];
     }
     return self;
-}
-
--(void)setup
-{
-    // register gesture recognizer
-    _dndLongPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(onLongPressGestureRecognizerTap:)];
-    [self addGestureRecognizer:_dndLongPressGestureRecognizer];
-    
 }
 
 #pragma mark Actions

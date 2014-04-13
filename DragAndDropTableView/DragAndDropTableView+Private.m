@@ -1,8 +1,18 @@
+#import <QuartzCore/QuartzCore.h>
 #import "DragAndDropTableView+Private.h"
+#import "DragAndDropProxy.h"
+#import "UIView+Snapshot.h"
 
 @implementation DragAndDropTableView (Private)
 
-- (void) beginDraggingWithGestureRecognizer:(UIGestureRecognizer *)gestuerRecognizer {
+-(void)setup
+{
+    // register gesture recognizer
+    _dndLongPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(onLongPressGestureRecognizerTap:)];
+    [self addGestureRecognizer:_dndLongPressGestureRecognizer];
+}
+
+- (void) beginDraggingWithGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
     _latestTouchPoint = [gestureRecognizer locationInView:self];
     
     // get index path of position
@@ -47,7 +57,7 @@
     [self reloadRowsAtIndexPaths:[NSArray arrayWithObject:_movingIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
-- (void) continueDraggingWithGestureRecognizer:(UIGestureRecognizer *)gestuerRecognizer {
+- (void) continueDraggingWithGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
     _latestTouchPoint = [gestureRecognizer locationInView:self];
     
     // check if we've moved close enough to an edge to autoscroll, or far enough away to stop autoscrolling
@@ -126,7 +136,7 @@
     }
 }
 
-- (void) endDraggingWithGestureRecognizer:(UIGestureRecognizer *)gestuerRecognizer {
+- (void) endDraggingWithGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer {
     if(_autoscrollTimer)
     {
         [_autoscrollTimer invalidate]; _autoscrollTimer = nil;
