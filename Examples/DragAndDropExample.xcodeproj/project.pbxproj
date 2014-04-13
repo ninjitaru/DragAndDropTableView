@@ -22,6 +22,7 @@
 		03F7B70D17205B6100A355CB /* UIView+Snapshot.m in Sources */ = {isa = PBXBuildFile; fileRef = 03F7B70817205AF700A355CB /* UIView+Snapshot.m */; };
 		96EAD66818FAA23100B4C497 /* DragAndDropProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 96EAD66718FAA23100B4C497 /* DragAndDropProxy.m */; };
 		96EAD66B18FAA55600B4C497 /* DragAndDropTableView+Private.m in Sources */ = {isa = PBXBuildFile; fileRef = 96EAD66A18FAA55600B4C497 /* DragAndDropTableView+Private.m */; };
+		96EAD66E18FAA73000B4C497 /* PanableDragAndDropTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 96EAD66D18FAA73000B4C497 /* PanableDragAndDropTableView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,8 @@
 		96EAD66718FAA23100B4C497 /* DragAndDropProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragAndDropProxy.m; sourceTree = "<group>"; };
 		96EAD66918FAA55600B4C497 /* DragAndDropTableView+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DragAndDropTableView+Private.h"; sourceTree = "<group>"; };
 		96EAD66A18FAA55600B4C497 /* DragAndDropTableView+Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DragAndDropTableView+Private.m"; sourceTree = "<group>"; };
+		96EAD66C18FAA73000B4C497 /* PanableDragAndDropTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PanableDragAndDropTableView.h; sourceTree = "<group>"; };
+		96EAD66D18FAA73000B4C497 /* PanableDragAndDropTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PanableDragAndDropTableView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +128,8 @@
 		03F7B70417205AF700A355CB /* DragAndDropTableView */ = {
 			isa = PBXGroup;
 			children = (
+				96EAD66C18FAA73000B4C497 /* PanableDragAndDropTableView.h */,
+				96EAD66D18FAA73000B4C497 /* PanableDragAndDropTableView.m */,
 				96EAD66918FAA55600B4C497 /* DragAndDropTableView+Private.h */,
 				96EAD66A18FAA55600B4C497 /* DragAndDropTableView+Private.m */,
 				96EAD66618FAA23100B4C497 /* DragAndDropProxy.h */,
@@ -215,6 +220,7 @@
 				96EAD66B18FAA55600B4C497 /* DragAndDropTableView+Private.m in Sources */,
 				96EAD66818FAA23100B4C497 /* DragAndDropProxy.m in Sources */,
 				03F7B70D17205B6100A355CB /* UIView+Snapshot.m in Sources */,
+				96EAD66E18FAA73000B4C497 /* PanableDragAndDropTableView.m in Sources */,
 				033F495A17099C9D000011E9 /* main.m in Sources */,
 				033F495E17099C9D000011E9 /* AppDelegate.m in Sources */,
 				033F4987170A018A000011E9 /* DNDViewController.m in Sources */,
