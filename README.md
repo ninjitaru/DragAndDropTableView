@@ -1,6 +1,6 @@
-DragAndDropTableView
+PanableDragAndDropTableView
 =
-DragAndDropTableView is a UITableView which supports drag and drop reordering of table cells.
+DragAndDropTableView is a UITableView which supports drag and drop reordering of table cells. PanableDragAndDropTableView allows the UITableView to activate drag and drop by pan the cell to the right
 
 ## Installation
 ### Manual
